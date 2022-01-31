@@ -17,7 +17,7 @@ parameters = {
 
 web_headers = {
     'Accepts': 'application/json',
-    'X-CMC_PRO_API_KEY': '489aa4ed-74c7-4088-a8b2-a069d2fce6e8',
+    'X-CMC_PRO_API_KEY': '',
     'Cache-Control': 'max-age=0',
     'Connection': 'keep-alive'
 
