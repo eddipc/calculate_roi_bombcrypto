@@ -17,10 +17,9 @@ parameters = {
 
 web_headers = {
     'Accepts': 'application/json',
-    'X-CMC_PRO_API_KEY': '',
+    'X-CMC_PRO_API_KEY': '489aa4ed-74c7-4088-a8b2-a069d2fce6e8',
     'Cache-Control': 'max-age=0',
     'Connection': 'keep-alive'
-
 }
 
 session = Session()
@@ -78,8 +77,6 @@ col_rows2 = [
     ]
 ]
 
-
-
 layout = [
     headers + col_rows,
     headers2 + col_rows2,
@@ -89,40 +86,42 @@ layout = [
         sg.Text('$BC: ' + bc_price, key='bc_price')
     ]
 ]
-usd_value = Decimal(20.79)
-days_list = [7, 7, 15, 15, 30, 30, 365/2, 365/2, 365, 365]
 
-def update_price():
-    response = session.get(url, params=parameters)
-    bc_price = str('{:.2f}'.format(json.loads(response.text)['data']['12252']['quote']['USD']['price']))
-    window['bc_price'].update("$BC: " + bc_price)
 
-def calculate_roi(values):
+def update_price() -> None:
+    new_response = session.get(url, params=parameters)
+    latest_bc_price = str('{:.2f}'.format(json.loads(new_response.text)['data']['12252']['quote']['USD']['price']))
+    window['bc_price'].update("$BC: " + latest_bc_price)
 
+
+def calculate_roi(fields_values) -> None:
     counter = 2
-
     price = Decimal(bc_price)
-
     invest = Decimal(0.0)
     bc_per_day = Decimal(0.0)
 
-    if values[0] != '' and values[1] != '':
+    if fields_values[0] != '' and fields_values[1] != '':
         invest = Decimal(values[0])
         bc_per_day = Decimal(values[1])
 
         values[2] = round(invest / bc_per_day, 0)
 
+        days_list = [7, 7, 15, 15, 30, 30, 365 / 2, 365 / 2, 365, 365]
+
         for i in days_list:
-            counter = counter + 1
-
+            counter += 1
             if counter % 2:
-                values[counter] = round(Decimal((Decimal(i) * bc_per_day)) - invest, 1)
+                fields_values[counter] = round(Decimal((Decimal(i) * bc_per_day)) - invest, 1)
             else:
-                values[counter] = round(Decimal(Decimal(i) * bc_per_day * price) - Decimal((invest * price)), 2)
+                fields_values[counter] = round(Decimal(Decimal(i) * bc_per_day * price) - Decimal((invest * price)), 2)
 
-            window['bc_gain' + str(counter)].update(values[counter])
+            window['bc_gain' + str(counter)].update(fields_values[counter])
 
-        window['days_left'].update(values[2])
+        window['days_left'].update(fields_values[2])
+    else:
+        for i in range(3, 13):
+            window['bc_gain' + str(i)].update('')
+            window['days_left'].update('')
 
 
 # Create the Window
